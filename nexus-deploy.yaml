@@ -78,6 +78,8 @@ spec:
               value: "-Xms1024m -Xmx2048m -XX:MaxDirectMemorySize=2g -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
             - name: NEXUS_CONTEXT
               value: "nexus"
+            - name: NEXUS_SECURITY_INITIAL_PASSWORD
+              value: "ComplexPassword1!"
           ports:
             - name: http
               containerPort: 8081
