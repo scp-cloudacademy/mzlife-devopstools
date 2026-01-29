@@ -1,0 +1,216 @@
+---
+# GitLab All-in-One Deployment
+# Namespace: devops
+# URL: http://gitlab.creative-energy.net
+# Initial Root Password: Admin123!
+
+---
+# PersistentVolumeClaim for GitLab data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-data
+  namespace: devops
+  labels:
+    app: gitlab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+# PersistentVolumeClaim for GitLab config
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-config
+  namespace: devops
+  labels:
+    app: gitlab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# PersistentVolumeClaim for GitLab logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-logs
+  namespace: devops
+  labels:
+    app: gitlab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# GitLab Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+  namespace: devops
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      hostname: gitlab
+      containers:
+        - name: gitlab
+          image: gitlab/gitlab-ce:18.4.5-ce.0
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: ssh
+              containerPort: 22
+              protocol: TCP
+          env:
+            - name: GITLAB_OMNIBUS_CONFIG
+              value: |
+                external_url 'http://DOMAIN_PLACEHOLDER/gitlab'
+                gitlab_rails['initial_root_password'] = 'ComplexPassword123!@#'
+                gitlab_rails['gitlab_shell_ssh_port'] = 22
+
+                # Disable unused services for resource optimization
+                prometheus_monitoring['enable'] = false
+                alertmanager['enable'] = false
+
+                # GitLab configuration
+                gitlab_rails['time_zone'] = 'Asia/Seoul'
+                gitlab_rails['gitlab_email_enabled'] = false
+
+                # PostgreSQL (built-in)
+                postgresql['shared_buffers'] = "256MB"
+
+                # Puma workers (reduce for lower resource usage)
+                puma['worker_processes'] = 2
+
+                # Sidekiq
+                sidekiq['concurrency'] = 10
+
+                # Nginx settings for large file uploads
+                nginx['client_max_body_size'] = '10000m'
+
+                # Git push size limits
+                gitlab_rails['max_attachment_size'] = 10000
+                gitlab_rails['receive_max_input_size'] = 10000
+          volumeMounts:
+            - name: gitlab-data
+              mountPath: /var/opt/gitlab
+            - name: gitlab-config
+              mountPath: /etc/gitlab
+            - name: gitlab-logs
+              mountPath: /var/log/gitlab
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "curl -f http://localhost:80/gitlab/-/liveness || exit 1"
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 10
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "curl -f http://localhost:80/gitlab/-/readiness || exit 1"
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 10
+      volumes:
+        - name: gitlab-data
+          persistentVolumeClaim:
+            claimName: gitlab-data
+        - name: gitlab-config
+          persistentVolumeClaim:
+            claimName: gitlab-config
+        - name: gitlab-logs
+          persistentVolumeClaim:
+            claimName: gitlab-logs
+
+---
+# GitLab Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab
+  namespace: devops
+  labels:
+    app: gitlab
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+    - name: ssh
+      port: 22
+      targetPort: 22
+      protocol: TCP
+  selector:
+    app: gitlab
+---
+# GitLab Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gitlab-ingress
+  namespace: devops
+  labels:
+    app: gitlab
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10000m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: DOMAIN_PLACEHOLDER
+      http:
+        paths:
+          - path: /gitlab
+            pathType: Prefix
+            backend:
+              service:
+                name: gitlab
+                port:
+                  number: 80

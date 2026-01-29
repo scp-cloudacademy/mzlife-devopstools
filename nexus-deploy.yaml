@@ -1,0 +1,172 @@
+---
+# Nexus ConfigMap (nexus.properties)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexus-config
+  namespace: devops
+  labels:
+    app: nexus
+data:
+  nexus.properties: |
+    # Jetty section
+    # application-port=8081
+    # application-host=0.0.0.0
+
+    # Enable scripting API for DevOps tool integration
+    nexus.scripts.allowCreation=true
+---
+# Nexus PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-pvc
+  namespace: devops
+  labels:
+    app: nexus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-subdir-external-sc
+  resources:
+    requests:
+      storage: 50Gi
+---
+# Nexus Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  namespace: devops
+  labels:
+    app: nexus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      securityContext:
+        fsGroup: 200
+      initContainers:
+        - name: init-nexus-config
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /nexus-data/etc
+              cp /config/nexus.properties /nexus-data/etc/nexus.properties
+              chown -R 200:200 /nexus-data/etc
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+            - name: nexus-config
+              mountPath: /config
+      containers:
+        - name: nexus
+          image: sonatype/nexus3:3.68.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "-Xms1024m -Xmx2048m -XX:MaxDirectMemorySize=2g -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
+            - name: NEXUS_CONTEXT
+              value: "nexus"
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+            - name: docker
+              containerPort: 8082
+              protocol: TCP
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /nexus/service/rest/v1/status
+              port: http
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /nexus/service/rest/v1/status
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
+      volumes:
+        - name: nexus-data
+          persistentVolumeClaim:
+            claimName: nexus-pvc
+        - name: nexus-config
+          configMap:
+            name: nexus-config
+---
+# Nexus Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus
+  namespace: devops
+  labels:
+    app: nexus
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+      nodePort: 30081
+      protocol: TCP
+    - name: docker
+      port: 8082
+      targetPort: 8082
+      nodePort: 30082
+      protocol: TCP
+  selector:
+    app: nexus
+---
+# Nexus Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexus-ingress
+  namespace: devops
+  labels:
+    app: nexus
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10000m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: DOMAIN_PLACEHOLDER
+      http:
+        paths:
+          - path: /nexus
+            pathType: Prefix
+            backend:
+              service:
+                name: nexus
+                port:
+                  number: 8081

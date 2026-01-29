@@ -1,0 +1,260 @@
+---
+# ConfigMap for Jenkins Configuration as Code (JCasC)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-casc-config
+  namespace: devops
+data:
+  jenkins.yaml: |
+    jenkins:
+      systemMessage: "Jenkins configured automatically with Kubernetes Cloud"
+      numExecutors: 0
+      mode: NORMAL
+
+      clouds:
+        - kubernetes:
+            name: "kubernetes"
+            serverUrl: "https://kubernetes.default.svc.cluster.local"
+            namespace: "devops"
+            jenkinsUrl: "https://DOMAIN_PLACEHOLDER/jenkins"
+            jenkinsTunnel: "jenkins.devops.svc.cluster.local:50000"
+            skipTlsVerify: true
+            connectTimeout: 5
+            readTimeout: 15
+            containerCapStr: "10"
+            maxRequestsPerHostStr: "32"
+            webSocket: true
+            podLabels:
+              - key: "jenkins"
+                value: "slave"
+            templates:
+              # BASE-TEMPLATE: Default Jenkins Agent template
+              # Important: At least one container must be defined to execute builds.
+              # Without a container, "Waiting for next available executor" error will occur.
+              - name: "BASE-TEMPLATE"
+                namespace: "devops"
+                label: "DEFAULT"
+                nodeUsageMode: "NORMAL"
+                containers:
+                  # jnlp container: Handles communication between Jenkins Agent and Master
+                  # For private registry: (Container Registry endpoint)/jenkins-agent:v1.1-jdk17
+                  # For public image: jenkins/inbound-agent:latest-jdk17
+                  - name: "jnlp"
+                    image: "CR_ENDPOINT_PLACEHOLDER/jenkins-agent:v1.1-jdk17"
+                    workingDir: "/home/jenkins/agent"
+                    ttyEnabled: true
+                    resourceRequestCpu: "200m"
+                    resourceRequestMemory: "512Mi"
+                    resourceLimitCpu: "1000m"
+                    resourceLimitMemory: "1Gi"
+                # imagePullSecrets is required only when using private registry
+                # Keep commented out when using public images
+                imagePullSecrets:
+                  - name: "devopssecret"
+                volumes:
+                  - emptyDirVolume:
+                      mountPath: "/tmp"
+                      memory: false
+                idleMinutes: 0
+                activeDeadlineSeconds: 0
+                slaveConnectTimeout: 1000
+
+              # default: Template for Docker builds (includes DinD)
+              # Use this template when Docker image build is required
+              - name: "default"
+                namespace: "devops"
+                label: "DEFAULT"
+                inheritFrom: "BASE-TEMPLATE"
+                nodeUsageMode: "NORMAL"
+                containers:
+                  - name: "jnlp"
+                    # For private registry: (Container Registry endpoint)/jenkins-agent:v1.1-jdk17
+                    # For public image: jenkins/inbound-agent:latest-jdk17
+                    image: "CR_ENDPOINT_PLACEHOLDER/jenkins-agent:v1.1-jdk17"
+                    workingDir: "/home/jenkins"
+                    ttyEnabled: false
+                    envVars:
+                      - envVar:
+                          key: "DOCKER_HOST"
+                          value: "tcp://localhost:2375"
+                  - name: "dind"
+                    # For private registry: (Container Registry endpoint)/docker:dind
+                    # For public image: docker:dind
+                    image: "docker:dind"
+                    workingDir: "/home/jenkins/agent"
+                    privileged: true
+                    ttyEnabled: false
+                    envVars:
+                      - envVar:
+                          key: "DOCKER_TLS_CERTDIR"
+                          value: ""
+                # imagePullSecrets is required only when using private registry
+                imagePullSecrets:
+                  - name: "devopssecret"
+                yaml: |
+                  spec:
+                    containers:
+                    - name: dind
+                      readinessProbe:
+                        exec:
+                          command: ["docker", "version"]
+                        initialDelaySeconds: 10
+
+      securityRealm:
+        local:
+          allowsSignup: false
+          users:
+            - id: "admin"
+              password: "${JENKINS_ADMIN_PASSWORD:-admin}"
+
+    unclassified:
+      location:
+        url: "https://DOMAIN_PLACEHOLDER/jenkins/"
+---
+# PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pvc
+  namespace: devops
+  labels:
+    app: jenkins
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-subdir-external-sc
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: devops
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccountName: jenkins
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: JAVA_OPTS
+              value: "-Xmx1024m -Xms512m -Djenkins.install.runSetupWizard=true -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true -Dhudson.security.HudsonPrivateSecurityRealm.ID_REGEX=[^/]*"
+            - name: CASC_JENKINS_CONFIG
+              value: "/var/jenkins_config/jenkins.yaml"
+            - name: JENKINS_OPTS
+              value: "--prefix=/jenkins"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: agent
+              containerPort: 50000
+              protocol: TCP
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+            - name: jenkins-config
+              mountPath: /var/jenkins_config
+              readOnly: true
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /jenkins/login
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /jenkins/login
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-pvc
+        - name: jenkins-config
+          configMap:
+            name: jenkins-casc-config
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: devops
+  labels:
+    app: jenkins
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+      protocol: TCP
+    - name: agent
+      port: 50000
+      targetPort: 50000
+      nodePort: 30050
+      protocol: TCP
+  selector:
+    app: jenkins
+---
+# Jenkins Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: devops
+  labels:
+    app: jenkins
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10000m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: DOMAIN_PLACEHOLDER
+      http:
+        paths:
+          - path: /jenkins
+            pathType: Prefix
+            backend:
+              service:
+                name: jenkins
+                port:
+                  number: 8080
