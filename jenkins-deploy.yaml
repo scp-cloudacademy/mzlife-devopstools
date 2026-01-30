@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: jenkins-casc-config
-  namespace: devops
+  namespace: devops-tool
 data:
   jenkins.yaml: |
     jenkins:
@@ -16,9 +16,9 @@ data:
         - kubernetes:
             name: "kubernetes"
             serverUrl: "https://kubernetes.default.svc.cluster.local"
-            namespace: "devops"
+            namespace: "devops-tool"
             jenkinsUrl: "https://DOMAIN_PLACEHOLDER/jenkins"
-            jenkinsTunnel: "jenkins.devops.svc.cluster.local:50000"
+            jenkinsTunnel: "jenkins.devops-tool.svc.cluster.local:50000"
             skipTlsVerify: true
             connectTimeout: 5
             readTimeout: 15
@@ -33,7 +33,7 @@ data:
               # Important: At least one container must be defined to execute builds.
               # Without a container, "Waiting for next available executor" error will occur.
               - name: "BASE-TEMPLATE"
-                namespace: "devops"
+                namespace: "devops-tool"
                 label: "DEFAULT"
                 nodeUsageMode: "NORMAL"
                 containers:
@@ -63,7 +63,7 @@ data:
               # default: Template for Docker builds (includes DinD)
               # Use this template when Docker image build is required
               - name: "default"
-                namespace: "devops"
+                namespace: "devops-tool"
                 label: "DEFAULT"
                 inheritFrom: "BASE-TEMPLATE"
                 nodeUsageMode: "NORMAL"
@@ -117,7 +117,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: jenkins-pvc
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: jenkins
 spec:
@@ -133,7 +133,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jenkins
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: jenkins
 spec:
@@ -212,7 +212,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: jenkins
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: jenkins
 spec:
@@ -236,7 +236,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: jenkins-ingress
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: jenkins
   annotations:
@@ -258,3 +258,4 @@ spec:
                 name: jenkins
                 port:
                   number: 8080
+
