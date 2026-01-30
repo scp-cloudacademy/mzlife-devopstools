@@ -4,7 +4,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sonarqube-postgresql-pvc
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube-postgresql
 spec:
@@ -20,7 +20,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube-postgresql
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube-postgresql
 spec:
@@ -85,7 +85,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: sonarqube-postgresql
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube-postgresql
 spec:
@@ -102,7 +102,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sonarqube-data-pvc
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube
 spec:
@@ -118,7 +118,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sonarqube-extensions-pvc
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube
 spec:
@@ -134,7 +134,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: sonarqube-logs-pvc
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube
 spec:
@@ -150,7 +150,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube
 spec:
@@ -262,7 +262,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: sonarqube
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube
 spec:
@@ -281,7 +281,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sonarqube-ingress
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: sonarqube
   annotations:
@@ -303,3 +303,4 @@ spec:
                 name: sonarqube
                 port:
                   number: 9000
+
