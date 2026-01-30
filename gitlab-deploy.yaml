@@ -1,6 +1,6 @@
 ---
 # GitLab All-in-One Deployment
-# Namespace: devops
+# Namespace: devops-tool
 # URL: http://gitlab.creative-energy.net
 # Initial Root Password: Admin123!
 
@@ -10,7 +10,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gitlab-data
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: gitlab
 spec:
@@ -26,7 +26,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gitlab-config
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: gitlab
 spec:
@@ -42,7 +42,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gitlab-logs
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: gitlab
 spec:
@@ -58,7 +58,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gitlab
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: gitlab
 spec:
@@ -166,7 +166,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gitlab
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: gitlab
 spec:
@@ -192,7 +192,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gitlab-ingress
-  namespace: devops
+  namespace: devops-tool
   labels:
     app: gitlab
   annotations:
@@ -214,3 +214,4 @@ spec:
                 name: gitlab
                 port:
                   number: 80
+
