@@ -1,8 +1,6 @@
 ---
 # GitLab All-in-One Deployment
 # Namespace: devops-tool
-# URL: http://gitlab.creative-energy.net
-# Initial Root Password: Admin123!
 
 ---
 # PersistentVolumeClaim for GitLab data
@@ -214,4 +212,5 @@ spec:
                 name: gitlab
                 port:
                   number: 80
+
 
