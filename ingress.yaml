@@ -1,0 +1,914 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      cni.projectcalico.org/containerID: 5b33f6479eb802fa42fbfc035705d4c4824b5a8c3bf071b063e146f4b6ee1d99
+      cni.projectcalico.org/podIP: 172.21.189.122/32
+      cni.projectcalico.org/podIPs: 172.21.189.122/32
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    generateName: nginx-controller-ingress-controller-6c44c964fd-
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/name: ingress-controller
+      pod-template-hash: 6c44c964fd
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller-6c44c964fd-pkqrm
+    namespace: ingressnew
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: nginx-controller-ingress-controller-6c44c964fd
+      uid: 0abce1ce-bd2b-457c-aa75-fc73a417e153
+    resourceVersion: "3492969"
+    uid: 70a8a841-1153-4937-82ff-93048bedb0fb
+  spec:
+    containers:
+    - args:
+      - /nginx-ingress-controller
+      - --election-id=ingress-controller-leader-nginx-controller-ingressnew
+      - --configmap=$(POD_NAMESPACE)/nginx-controller-ingress-controller
+      - --controller-class=k8s.io/nginx-controller-ingress-controller
+      - --ingress-class=nginx-controller-ingressnew
+      env:
+      - name: TZ
+        value: Asia/Seoul
+      - name: LANG
+        value: ko_KR.UTF-8
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.name
+      - name: POD_NAMESPACE
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.namespace
+      image: scr.comm.scp-in.com/score-scpapps/nginx-ingress-controller:v1.14.0
+      imagePullPolicy: IfNotPresent
+      lifecycle:
+        postStart:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - mkdir -p /var/log/k8s-ingress/$(hostname) && ln -sf /var/log/k8s-ingress/$(hostname)/access.log
+              /var/log/nginx/access.log && ln -sf /var/log/k8s-ingress/$(hostname)/error.log
+              /var/log/nginx/error.log
+        preStop:
+          exec:
+            command:
+            - /wait-shutdown
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /healthz
+          port: 10254
+          scheme: HTTP
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      name: ingress-controller
+      ports:
+      - containerPort: 80
+        name: http
+        protocol: TCP
+      - containerPort: 443
+        name: https
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /healthz
+          port: 10254
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 1Gi
+      securityContext:
+        allowPrivilegeEscalation: true
+        capabilities:
+          add:
+          - NET_BIND_SERVICE
+          drop:
+          - ALL
+        runAsUser: 101
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/log/k8s-ingress
+        name: logs
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-l9rkj
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: ske-node-l652b-qq8nt
+    nodeSelector:
+      kubernetes.io/os: linux
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: nginx-controller-ingress-controller
+    serviceAccountName: nginx-controller-ingress-controller
+    terminationGracePeriodSeconds: 300
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: logs
+      persistentVolumeClaim:
+        claimName: nginx-controller-logs
+    - name: kube-api-access-l9rkj
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-02-06T13:12:15Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-02-06T13:12:13Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-02-06T13:12:44Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-02-06T13:12:44Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-02-06T13:12:13Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://3c959c21680a41ab58d3df22b8f3cbbb0f943fa960de28cd04f52892c88c05f7
+      image: scr.comm.scp-in.com/score-scpapps/nginx-ingress-controller:v1.14.0
+      imageID: scr.comm.scp-in.com/score-scpapps/nginx-ingress-controller@sha256:f0c42293d4552eff1855f47509f5ac9fdf6347b9b52f67453ff13894a3edca24
+      lastState: {}
+      name: ingress-controller
+      ready: true
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2026-02-06T13:12:14Z"
+      volumeMounts:
+      - mountPath: /var/log/k8s-ingress
+        name: logs
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-l9rkj
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.0.2.2
+    hostIPs:
+    - ip: 10.0.2.2
+    phase: Running
+    podIP: 172.21.189.122
+    podIPs:
+    - ip: 172.21.189.122
+    qosClass: Guaranteed
+    startTime: "2026-02-06T13:12:13Z"
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: ingress-controller
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/resource-kind: service
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+    resourceVersion: "3492828"
+    uid: 67c5ab82-e9be-471c-939b-475e60e95330
+  spec:
+    clusterIP: 172.20.152.136
+    clusterIPs:
+    - 172.20.152.136
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      nodePort: 32723
+      port: 80
+      protocol: TCP
+      targetPort: http
+    - name: https
+      nodePort: 32512
+      port: 443
+      protocol: TCP
+      targetPort: https
+    selector:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/name: ingress-controller
+      release: nginx-controller
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    generation: 1
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: ingress-controller
+      helm.sh/chart: ingress-controller-1.14.0
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/resource-kind: deployment
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+    resourceVersion: "3492973"
+    uid: c6dee485-b095-472b-bcd7-cb9f4e3aacc7
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: ingress-controller
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: nginx-controller
+        app.kubernetes.io/name: ingress-controller
+        release: nginx-controller
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 0
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: ingress-controller
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/instance: nginx-controller
+          app.kubernetes.io/name: ingress-controller
+          product: nginx-ingress-controller
+          release: nginx-controller
+          release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+          sdspaas.io/created-by: "15616"
+          sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+          sdspaas.io/managed-by: SDS_PaaS
+          sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+          sdspaas.io/price: Free
+          sdspaas.io/version: 1.14.0
+      spec:
+        containers:
+        - args:
+          - /nginx-ingress-controller
+          - --election-id=ingress-controller-leader-nginx-controller-ingressnew
+          - --configmap=$(POD_NAMESPACE)/nginx-controller-ingress-controller
+          - --controller-class=k8s.io/nginx-controller-ingress-controller
+          - --ingress-class=nginx-controller-ingressnew
+          env:
+          - name: TZ
+            value: Asia/Seoul
+          - name: LANG
+            value: ko_KR.UTF-8
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          image: scr.comm.scp-in.com/score-scpapps/nginx-ingress-controller:v1.14.0
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - mkdir -p /var/log/k8s-ingress/$(hostname) && ln -sf /var/log/k8s-ingress/$(hostname)/access.log
+                  /var/log/nginx/access.log && ln -sf /var/log/k8s-ingress/$(hostname)/error.log
+                  /var/log/nginx/error.log
+            preStop:
+              exec:
+                command:
+                - /wait-shutdown
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: ingress-controller
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          - containerPort: 443
+            name: https
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            runAsUser: 101
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/log/k8s-ingress
+            name: logs
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          kubernetes.io/os: linux
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: nginx-controller-ingress-controller
+        serviceAccountName: nginx-controller-ingress-controller
+        terminationGracePeriodSeconds: 300
+        volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: nginx-controller-logs
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-02-06T13:12:44Z"
+      lastUpdateTime: "2026-02-06T13:12:44Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2026-02-06T13:12:13Z"
+      lastUpdateTime: "2026-02-06T13:12:44Z"
+      message: ReplicaSet "nginx-controller-ingress-controller-6c44c964fd" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "1"
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    generation: 1
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/name: ingress-controller
+      pod-template-hash: 6c44c964fd
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller-6c44c964fd
+    namespace: ingressnew
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: nginx-controller-ingress-controller
+      uid: c6dee485-b095-472b-bcd7-cb9f4e3aacc7
+    resourceVersion: "3492972"
+    uid: 0abce1ce-bd2b-457c-aa75-fc73a417e153
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: ingress-controller
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: nginx-controller
+        app.kubernetes.io/name: ingress-controller
+        pod-template-hash: 6c44c964fd
+        release: nginx-controller
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: ingress-controller
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/instance: nginx-controller
+          app.kubernetes.io/name: ingress-controller
+          pod-template-hash: 6c44c964fd
+          product: nginx-ingress-controller
+          release: nginx-controller
+          release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+          sdspaas.io/created-by: "15616"
+          sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+          sdspaas.io/managed-by: SDS_PaaS
+          sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+          sdspaas.io/price: Free
+          sdspaas.io/version: 1.14.0
+      spec:
+        containers:
+        - args:
+          - /nginx-ingress-controller
+          - --election-id=ingress-controller-leader-nginx-controller-ingressnew
+          - --configmap=$(POD_NAMESPACE)/nginx-controller-ingress-controller
+          - --controller-class=k8s.io/nginx-controller-ingress-controller
+          - --ingress-class=nginx-controller-ingressnew
+          env:
+          - name: TZ
+            value: Asia/Seoul
+          - name: LANG
+            value: ko_KR.UTF-8
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          image: scr.comm.scp-in.com/score-scpapps/nginx-ingress-controller:v1.14.0
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - mkdir -p /var/log/k8s-ingress/$(hostname) && ln -sf /var/log/k8s-ingress/$(hostname)/access.log
+                  /var/log/nginx/access.log && ln -sf /var/log/k8s-ingress/$(hostname)/error.log
+                  /var/log/nginx/error.log
+            preStop:
+              exec:
+                command:
+                - /wait-shutdown
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: ingress-controller
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          - containerPort: 443
+            name: https
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            runAsUser: 101
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/log/k8s-ingress
+            name: logs
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          kubernetes.io/os: linux
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: nginx-controller-ingress-controller
+        serviceAccountName: nginx-controller-ingress-controller
+        terminationGracePeriodSeconds: 300
+        volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: nginx-controller-logs
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIDBzCCAe+gAwIBAgIIYP6UxVwho64wDQYJKoZIhvcNAQELBQAwFTETMBEGA1UE
+      AxMKa3ViZXJuZXRlczAgFw0yNTEyMDkwODQwMzFaGA8yMDU1MTIwMjA4NDAzMVow
+      FTETMBEGA1UEAxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+      AQoCggEBAK3l+02TiBzmAK4bTGQbL62w+knwir91nYGDNI4TWH4f3w57jSsAlaSa
+      9q8KItxGlJVCa6K2OC8y6B+fKWkxtiDSzKDz9SpOSajJ3kuT1CxmQYf3HBGfpwri
+      G9uSkbSAXy5R6VtpkABh83qaEWGRNqiZedF5Ye9LMgysaom268O2RPjbrsGU/LGG
+      V21/Xfi5C16f1RV5vtz/a6YFbRE9+LoAEHo8jcBMLNFkSylS+gHQav51Kyq6UXxW
+      jhjxWxa/4rpUOY9TU1VhIc91JLRxu4cQaA95YkAWO6gztlHfgg61zFce8wut1/zl
+      qtrXJX9st4fc1cG3cDpXIKO5ZcRUU+ECAwEAAaNZMFcwDgYDVR0PAQH/BAQDAgKk
+      MA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFKqyIcdfGp73CEgjG3fBh+Ht3zwb
+      MBUGA1UdEQQOMAyCCmt1YmVybmV0ZXMwDQYJKoZIhvcNAQELBQADggEBAA6OgUmj
+      Fx5sNF4H/jUYRZVMvPHOockohwnyOGlkbYkJDT07/TfXj+Ma6bsjgPrselX687+v
+      AFFCiPxuYeq9CLc337PJY+qTQGbJbjXdQzB/g6i4eNKIrjCS/EylopD4xil1i63J
+      8Uluh3UEvXLmNL7GzPdjvqei2K4vv/zUgu5E0GSNlVc0gPPY8GdRyZQvMYv/YbYl
+      bsdErebFSEy9xa2M5TGFn73kBHomeaHfKF4J7EQYB3g4rjDeitR1yuIiWakPzgUE
+      5QA+MnJ7IujCgkJWkcNG5X6uCKz2ixpZdt2GD2IgssC1CAHoMVaqPYoVivz5cjGU
+      JVmerGKZkVOpkBY=
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2026-02-06T13:11:42Z"
+    name: kube-root-ca.crt
+    namespace: ingressnew
+    resourceVersion: "3492669"
+    uid: 18457caf-ffb3-469d-9daf-af510102a0b0
+- apiVersion: v1
+  data:
+    allow-snippet-annotations: "false"
+    enable-underscores-in-headers: "true"
+    hsts: "false"
+    http-redirect-code: "301"
+    server-tokens: "false"
+    ssl-redirect: "false"
+    use-forwarded-headers: "true"
+    use-gzip: "false"
+  kind: ConfigMap
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: ingress-controller
+      helm.sh/chart: ingress-controller-1.14.0
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/resource-kind: configmap
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+    resourceVersion: "3492810"
+    uid: 858bc655-aa44-465e-a0e7-317176380381
+- apiVersion: v1
+  data:
+    release: SDRzSUFBQUFBQUFDLyt5OStaT2l5TFk0L3E4WXZ2dkRlekZkM1loYld4RTM0cXVvQ0NxV0c5dnJHeE5zQldpeUZJdUtOK1ovLzBabUFvSmlMVDA5ZDJiZXB5ZWlwMXRJY2puN09Ya3l6Ny9ycnVJWTljZTZhOXJ1NlVIejNDandBRENDK3FlNjdUNTc5Y2QvMTUvdElJeCsxUTBmZUltaDF4L3JKRUYySGdqeWdlaHNTUEt4UVQ0Mm1wK2JSTHZWKzBvU3JWK0kzaU5CMUQvVmdmSTlYK2tHTUNMVUh2MEl0Y0QySTl0ejY0OTF4ZzBqQllDYTVqaytiRlQvVkE4akpZckQrbU05SCtkVDNmVWlBejdhV0ViTmRzM0FDTU1IdExyYVpYVTFTd2xycW1HNE5SdDNhdWlmdjduZlhOcUlhcEZsMUJUZkI3YW13SUZyMjlXc3BpYTFJSFpkMnpYaDY5Q0FjM0FVVnc4ZjRWZTFtbkh5dlNDcWNZdmg2RmZtNlovLytPOTlyQnBhQkdvUER4QytvYTlvK1dSYzQxZ3pqYWptZXJvUjFoNjgyaTcwWEYrSnJIOStxLy83c3gwWlR2aS94TDgrNDZWOVZuUWRmbVNFLzl2NFYvYmp0Mi8xLzBuSDFTeXY5cTNPMjZFZDFhd284aCsvZlBsSE9vdkhmMHcybTZkZjBhK254V3BUaTd5YW9tbEdHTllTTHc1S2F6ellTZzIyL3Z5dFh0bHRlTlB2K21NZHIxSFAzOXkrV3pOT0NzUmZqY0hncUVXV0V0VWNaVytFdFRnMGF0NHp3c0FGVnltSUZkL21qU0MwUGZleDVoclIwUXYydG10KzNuOE5QOXZlbDBORE5TS2xBUnZ1YlZkL3pIcUhEeHdqVW5RbFVoN2hqMXBOY1YwdlFyTUwweWUxR2tSWDRCcVJnVHBMRWZWWkEwb1lQdFlROGVDV0VKbVAyUW91anhCK0gydlBuZ2VmaGI2aHBUMEhNVEF1b3p6VUxDK01IbXZINC9GejJzZG56WE95MXpXTXdjdlBXZzJTUlZoNkFudFJGVzF2dVByVmMvaGZhQVFIV3pPNDRqVFgrTm5keGs5ZUVEM1d2aExYRGVEWWo3VXYrUEYvMVRhV0hkWkNRME5vdGNPYTU0S2tGaGd2c1IwWWVzMStybTFtYS9nODhtcXFVVE5jUlFXR1hudjJBb1RPQWpwcXRRZ1UxNFNoY3J2S3UxQ0NNOWNDSXlxdDhpRUNJU1FVSnAvSW5TbDhxaW0xTmZvZTBaaGlaMXhkMDR3Z3NwOGg1Um8xeGRWcmV5T3BPWEVZMVJRUW9rWDVnWGV3ZFVPdm9NaERnZlJ3N3hXVTU5NU91SnFDQ3Q5RUlQeXNRUVI5aXdtaXFhbEthSFJhTmNQVlBOM1EwWlRSQytQU2VtOGtkMXJ2amVUU09FcDg0L0dLOEZNWTFuLzdWTmNzSllpZzlNL1dBUCtkNm9wTXFwYTB4UUdEb3Y1WWIzeHV0RDRUTitKN1BWdy9LY3E2dG80VVYxY0N2VWJCSVdvYncvR0JncVQ1M2tpT1hxQ0g5Y2YvemNhb2Y2cVhSdGwvRGV2LytsUjNGQnVoemdoZzQzeGk2UkQxVDNYRFVXeFFmNnlId2VkUUQzMUZDZisvVUhIQzJEVWhMZFYvKzllbitnVjk5Y2Y2Z1lTTEJwNjJyeis2TVFDZjZsRTZyOUlBK2NNdjNHSXpXbitPVGhGY0p3SlBuYWN0d05BZ2xwc3MwSnJ6U0hWMFgzVk5VeUo3c1Q1aER5cDlBcG85OENSeGJrb09EMVI3NEtzdVIwakNLWlNGWlV5Wi9rUVdsNmFPK2hrZk5mcmtTK1NZVUlSZXpJejU5WVlhMk1aNmtPaENPMWFFdHN0TVZwNHNjb0NodVlNcU5DelZXWjBYcGpkbHFBRXdKb09ENWk3TnpiNDNXdkU5ZGpzazlsTTZha2dPdjlQcG96bGJOMkpKYUFDdE9iQWtjbXNhemRDY0FSYW9ORzlwNURiZU9PTklGcm1qSkhDQW1UUjZESzBEblJyRUtya0NXdEtQMUdUd29wRzlXS1BIaERJa2JDTnArenJOUjFvalBJcnI5bG1ueDRRdXptTkpXTzAxaHo5ckpIOFd6bU45NW96MzhnVENoK3N4OW41SzJYMVRGamhQVGZvMjc0Q3pJaTVOWmJJaXRLRjNtQ1dyeFlaWWpVVUNMQmYyaXVISHE2Vkl0SjlXSS81NU8rcXRlV3BBcUFtY1B3ZmhiUnBDcjZIWkEwdWJERUpGNEN5ZEJnZlZIcENLTURMWDQ5VjJTN1hzdStOTjVwMVo4blYvZ1plM1I5K011ZWYwMlhMVFlMZk1aSFZnNlBGT0l2bXpsZ3phYXBOUGJuQTFrWDFwUFVEejNTWXRtekw5Z1dvUGdFR1BJNDArQVdhVTB3akV0YVZUZzBnU0lxQWxnNFpHYmsyVmxGSWE0QTZxdTBwVThoVEtJdE9oVE0rRVl5bThERFNYODFXeTFXSG9OdEFuK2tGeklsOTF0Rmc1VytlWkF3NnpwblNTSEo2UU5pTklENEVpdFBjTGU4Q3FqcDdJSW5lR2NGQUZucENFbGFYVG93Nzh6VkFEUzNYYUI0Zzd1QTd0REdrSlB1K2JTcE8zWlpHTlpSSGl2KzJyU2MvUCtwbzVYQ2lKM0hsaEQ3cEcwbzk1Wnh6cUFuK2VPWHFva3F5bFV1MmRMbktFU2hLSWJoRTlFUGlibWRPMlZHRnJQb3NFSG90R3Z6c016YmNrb1hGVTZXM2hPWC9XNlBGTzNuaW03UFFPY001YWN3Q2tiSjRUdHFIU1BPUUJNNTEzeE5EV1FXc3VPOHhFYitwSk84ZkJ6T0VPNmpKdlp6SzBSZWlUZmdxSDdNL2dLSWtycndpSDdNOXNQYkFsZ1F0a0NGZlRNNi9md3o4YXlTZTZBM2J5OW5wTi9FWVdXVklST0ZBZUx4LzNuTDNmMHIxRUgzcm1ZdGlmVnJSRDgxdlkvVVBhejQ0WnJ6eEZuTU94ZHluOSsxb3lPS2pPcWMxQXZoTjVYM1A0UFVNRGh4bXY1dHNFdllkOFpNdnJBVkNkc2EzUzhMMTgwT3dCb2RCYmM1M2g3SWpYcWRPbmMzbk5oS25RdmJNK21YZHUxME9ZZWxOdnpwd2NuN0ZFOXFJck9KOWxnVXRrY2JXQU1tbFI0SldadUFxMW96ZGRDNUxKajA0YmhnWm5odVpqU1dDaHpJUjBrQ0E1dUw3UTlvd2FXTXlZQTFLVGhUSnJwNUp0UWhMQVJXYXVCenRaWkFsRmtCSFB5bXRJOTB0VElmazJRemNhV25OcFNzTHBuTUxrcURrOVVoRldRQjU2U0Y1SjRzRG5IVDdSU0hCUWQ1NnA3MG84dHNGcldjSm5rU3l1TEprZUU5TEd1MGZmRVlSbnluOUZtZHlCT0ZBaHpPa1NqeExxWkI1TFRaWlkyUDJ2a2pNK3l4dUpRREFoZTNzSUV3blMzYkNWOHNRcTFKSjJJSXY3RGpNODJaTElBVzYzTkdXaHZZT3lYS1lHOE4wdnNHOTlBbzZRdHlwNEhZNDVwY3gvL3JQKzI2Y0taZmlyWlFEZkNNTFBrUTh1K3RCb2hvY3BrcjlFaDVsd0VCZU9JcHdBSHFjUlFaa2dDWndIeDV6YXZkN3owdThheWRjWGFzKzNOSG9jeXhTbVB4WHFvdlhnSUtmMEtKR1dwYm5MbUxLOUE1UWJSak9NR0hvRlpBZkU4cnB2NXpJbWFjUXlDV0tEYWlPNE1uWS9LcmNmTjlUSjBwenRPVThTV1dLMng3Sm9CbVJMbmZCdzdlaTdUUlBLVzlhWDZhMzVUQTBJemVWaktlbVQ4MlR3bFptc0VrVm9iSFJCZGhUUk5CbWJzQm1xa2E2RmdIRGU0OS9lRk1IRDlJZWF3MXY2WlIzWitoQU42aGxkUVQyRzlBSGtSYmFkMGExQ2p4T2RHb1NTd0FLVmFrMHZjQ05NbWVZZFJXZ0RobUl2c2xsb3U0clFiczBjdk1ZU0RDYURSQkhhaEd6M2JWYWNSNnc0dHhtcVBjUmp0QkV2Rm40THNzaWVzWDQ3bXByREgxVW9pOWQ5ZTVvd0pnTysydkM1RG1Xd016ZTUzUnpEeWdIUnRzazdzZ05hRE1WRVpSendzVXpoMzVRYmRXZUpOMTAyV1NDSks4RFFJN1FlU2VSRFNEZTZjQXFOOWVDa0MrTVE4aTJpYzNGd1RQa3Bwb0FPSUM1MG9iM0QzNDhKWmlpZEdScXQrOHpRTEpESU1kS3ZHdG1EOEo3cEFnczBwdzEwbWorbi9aaXlBNEJLcjg0TVBVN2tOYlFqR3RDdTJTTzlQOEd5ZFhyQngyZ0Q1Z2gvV0xad1IxbVkrelBUZTVrMUd6MjBwdlZnTHd1eXJ6cGJrM0Z1Yk1OWWR2bFF4V09YNkVZUnBDSWRvdlVqT3RuMlNGbGtFeWlQaXUzZmJQdHgzSVFRVmpNeFcwZC9qK20wMzNuQ2E3SjA0VVJVMElzZ0NhZUdMTTdqMStZTDE0ZnNZbnJzcSs3Y1pPbU05NjVzMEhWaFRsUjdMUXNuQUdWWXhxc2Y1OGZUdWRSbk5RL2NqSlBONy92NS82M2ZGZktoQ0dkYWJxZzAxT0hqaGlTY2ZFaW5jcXJiTktjWHFqUzBRLy9ldkZEMmt3cDB2R1lLZEFqMU1ZaDFXaklabXo4emR0OVRvQzZiOFBzN3NyL2NqNzB2OWdXZ3pFVy96UXY4VmJJUnFXVExWT214RGVubEEzb0d5K1hKUEtNQlR4Wk8wY3psdkJtSjVTKzJrUWUrNm5DaGpuamlWVmtkUTk4THpoWDZsUko1YWtBZFZBVTdqZVJEV2VBSXRjbk9MM05vbVpkNUE2ZkFxd050TWlqSTgwYVBjc1pIaldvSFJUckFma1RCMTVoRTNmdDlIRTFONUErUWJzdnlmUURoWUdtVGZseGhWMFNTMExaa2t0L1BCTGFkK1E5YkI2NWxmSmJYN2R4T3p1QlF4bGxxTHdBT3lveWRUdmNTaGo1WmtzTkRtL0hkZEZjTnU4WnI4NDVUTy9VZHVNeGtPOFlGMUZrekIvbmhpZXJ3QkpTVGl2RDFvQWpJWjQ2UjNZZmhmQ3ZyM3FNM01TOWllNGZ1T1puZFVKSVRFdzVvTHJSOXQ2WWtjRHUxeWNjNjlxV2hUSGkvVGVGbS9mQURpZVFPdXRBbU5rVit4ZmJxTzJDRVpGdG1vOFhWdUw3d3AwTHpPeVhCdHVDRkI2L1htTk90cWROakYvc05ZNEtoRzlBZmhQNTFJZ3ZiaTczbG9wZ01sQ1g3RkdiUVB5V2d6NVRxbzd0dzBZaWluODV1SlVFWGtJeW1TbkxMbCsxQnJEYVg1blRDQVZXVWdiYm5EcW80c0RSSWw3dFdiMDYxRWk1cEhXZWJ2bDNVb3pKNU9rak9PSnc1SUpJRUhjemNsU1VuSlRubVNBSUlHWW9kbHZVQm1wY0Y1Nm5aQTE4VnhxNjhIaENTb0prYWFSMTA0UVJ0UzhBTSsvRjhwOFZ6YWdCOVBrOFJkRThXR2Z1OWVpdWxRVk4zUUxTd29lOEsvVElReXVLcXJkSGJuaXJ5a0xaM0NyM3RNRlF1U3lFdXg4WWt0WHRSdkFQVGVTSCtnZTN5dXpyazFtNjYySXo5ZUpuNkNha2RVWWhMb0ZqQ0U4SzlBL2J5R3V0eHFDK1Juc1Mya3EveVhFTjJaTitnK3Zhc3JJTnVaZENlUzJRQis1SkYzd0xaZDVNOWxJMldTZ05IRWFBOUQyVXQ1dEdaNllzUUo4aW1TSDFSblVLMkJiTDFOZWlEQ3B5bGkxQUdjZ2NJbjNWSkhtVzhEbTNpMDE1TE1EMnBOSWdVRWZsM2tLOEpCZEkvWmRuR0d2UE5hdFRlWUhpRFdFNEdaNDNtZDlQMVhYL2lqaTcrc1RhaEJtSHVyaHlHWW9DV0VFQkxtQ3A3TUIzekIrQU1zRUNmOEltYStwWGFoRDFva0cvR0xKQ1J2TUQ4bHRMbFBkaTRLdDJ6SmVFWUswTERrc2x0WEFVbnplRmRSZVFJelFVWUprT3Y5enFQczBBbXdWbWZzTzBpak5nSkN6UzZkMWJFMWVFamZWMisyWmZtaFdUam05OURlWVBnZmRnMm9iM2JkaTl6Z3JSdkFaVW16TG5kT3MzWGc3TXVEbzVxa3lXMFZFWkxJbmRXQkQxV0JhUm5vQjl2TVJQc3IrQjQ2c2pVblhHaUNHTmJwYmM1YkdWcTRFTS9tS0ZYdnV6SVFIUFE5MmVKN0IzbDlYRXF1VHpCalBLeDJ3eUtHZlNUMlc1MFpPalZRUmE1bUcwdVRhM0pIelc2Qi8xbVg2ZU9wa1orTlhWeWE2b09uL0dIcjRxRFVCWWFRSFdSTFBLMUJNcnJCbEFuSEdEbzAwRW13VzVtK2dOMXdoMW0xS0FKZGFva3RGeWR3akZiYVQwNFE3aW9TQ2RKVUpmc0pKRS9ZejNpdHhtYUp5RjhKWEdGZEJLMG5WV25SOEE1TTNUdmlHSjFaVG5ueTNaVkxCWGFVemoyVnJEclBrQkhoYmpkNU5hZW5pWDhlWUh0NnFvNGJxcEQyb2tzNkw3V1hDVUdwdTJqMnVSOGFIOFoyOVJmbWtDYXdUWktZU3dNejNmTUk1M0R4L3JPK051dEh1c0NyOVZsL21tZkYzdWxuN1c5a2tkZmdYYjJrRXlDUEpqQk5KTkpmMWtZM1B0dGVuZGllUnFJdzhnSUFnOFlueFBGS2NUenJ1T2Vtc05hVXRLMmRISGxxVTNXTnh5OGJ6Qnp3bFpxSjVQenBaL0ZSWWZxQk5vQmZMSjFlcUc4OUs5aW80UE1kOHIzSXJSSkg5dkNreFdBL0luc1c0b3QyNG00YlpMWnloVStCSmFSbDdabmVjSWRKV0djK2pjczBNaGVRM000TUJNaVgzV1dIWWJtUWwza0NLaWpWUElFTG5Zc1liN2hhNFlsMzRzYXhIRHRzdEFtbU9IU3ZNSlZJZ2x0RjlLT1F2THRHZFhmNjRqZnR1WmlWNHJuNVBvRjZpZDV3dS8wc2d3d1dUb0N4bnJRZTk1NCtIY3VXOHMrMlRXZDRHZURnaTlURGJlWldPV1BwSHN4YStUZkpicHdBdWsrU1lUMnFMWjZva0s1VzlnN21hMzdOcFB1RzBDNHFVMCtrY2pyL1JydW9EcXlMNU1OUzV2TUM5L0NPYStPS2dsaXZmd2M3MGtlQzMxTUJnZTUzQ2JiWHpoZmVKekFjZGQwanpQZjIzRDRSSEtMK3hnRXRLWE9lci9ZdjI3cE5PZkJOclAxd05Kb01OR2NYa083N0gvZ2RUVFp2U0swMDMzSWRyQ1lJRjh2MjZ2SzZlNENJemdXdEhYNGJEOEEya2wyK2YxbExyUDFvQ21KcTUyQ2ZoTm9YMkxWWkErNk9DakRsR0xzbkU5RTdxQ0w3RTRXcjlibzlQYXltTUlNK2s0T2U0VVhIZWcvWUp4OFQreGRZMlcvVDc3V1hCYngrYjUxMzlrYmZXdU9PVi9meFFPYWc0djNlUExmSWJUdml2M281SmlRU1BNSDhBUlBRaG55R28xS3FmOWZnalg5bnZFSDBJOW9xazBXeW1rM2w5M0h0K2FVeFZFNG9DVzliTC8vUGs0bi9CSEtlbm41UitNTTd5di9aK2hyNVdza2Q0RDRNTmJ2NGU5ck9jYUZ5dStRUFZrYm1lU0pkK2x6MVhaMTJ6WC9TTFcrWlgzVldVSFVUYS9UQzdKd2FnWkNTUndjMHhBYUlhT3RVT2orOXUxTHFQYWk1clJNTGFVcTd0WXRMTFFsVjFBMVdlbGNMeVN6Ym1SejNtVnoxdUNjaGN1Y0N5cnlqWkJWR21aTTBEeS9NblFiOW9IY0IrN2FSSit3bHVyb2dLRldnU3p1UTRaYUlWY0F1ODJWWnZaUmMzcDdYZUNJZ3RrQzFUTXlGZUN6VkYzbkpzTXpOVGpwUW84b3dxRWNndlV1VzgvM3c0dlJXMmxBbE1zZVZKcGZ5NExVeWJiQ01XdEFVNDIxSldFZVN5SlBLSFF2VVVTL1F2VU43cGlEUDJwK1hFTnlmQ0ExVnltZEVhWkNnbGdlZXVZMlQ4Y1k3eVN5MTFEZFpYbEwvdGJVL0ZqSXMwQ3ZSZFBpbm1tVnBWNWQ0ZTRlRytkWmNBK2E1ejdicHFQNGJ6Q3l2aHROczhVdnlWNHNPOERkQ09NajVUU0FUby8za3JpeUVKQ3ltSGttcCtqeFVSdGlSa001WGZRSjdVY3hWN0hzVE02bHlIZzFibzNiY251MDZEVG1mZEV0MnlpYnA1VE9VNFh6L05GMk4zMW5qNE5FY2RpRDZ2Q3huczRoMzRjeS8rS00vTWErMEt0N2FvaGcvUUlkakVPVjdqVm5JaGNyNHVBb2k4dElFdHF4Mmx4aFJuYm5IWVppSFFudG9USW96eERuQzIwakhjSmJaTThTQ1FYdVBGS0VWcVRRdkNWRElYdjJUTVpkSmJxd1JmYWhNdUVJOU15QmZnb0hrUDJEODY4aXplSDNpc2dDcWJtTVVEN0x4ak9aM2Z3NHgrT2h2Q2haWkNLZDdnV3kwRDR2N0w0dE8rTlFJM0hmV3BNTFp5S0szeVd5d0JIWDczVklsNEo4MEZ6ZDBwd1ZrS21HSnd0ak5IZllWcCt3alhSdERZM2NSbkxUOXlFdkZPYjZOb1Bpd3dpTzRVWlhISnBHSUM0WWUydjNJTjJSditac3FEcTFzaG9leWVJZ1ZKc2dnbFQvVitad21lYVBLdDFybzJoZ3Z4U1plWldTTS9NQmUvNUhVNFZ0YUQ3V3FYNlJ1Kzd0Mk8xVXNuRlV5VFpVMFoycnpNcWkybThxNHNxcmpxanhzVzdua3ViYW95YlVCckJVNGZpMk9WRGs1UC9Ua3NYTFRhbnFTQ2JFaFJSZlNaZ3NLbkdkaVpyU2FrK1doRWI0Q243SzN5VlZ1Q2pzWUdHVDRTZ0wyT3ErN0FReldSUXFRcDdBNklwL1BtaStmaXhDOVU0VDFMM3NlbS91OHdaWjZ2ZDdOZUNrdklOWmlFNUJOK0dna1p5bDB0dFlGdHFXNUp4QVRrOW90d0psUnQ5bUI3djV1Mkc2QTEya21XS0U2cXhQV0V1bmVkZklzaWduYUdleHc0elJIQ0ZzZUExbFNXNHptWFg5L09KVjBRM0xHSE1OemRIQnd1NmZ5cy81V0JKbFN4Rk9hQjBMdTQrc0VNM2hTVVhrZkpWc005RExWNXRzZTROMjJKWWRaamc2NG14cUFIRnF5Uk93a1FYdWdMTHgwKzhMTWphbnE1dk1VT3JXUmZxd3JQNGVXbnVuL0wyYllWS3l0c3pydVh5L1BLWXUxcDlPQWtLaDdzdVFYRGRVcld1eU9nakNPRktwMS9SRy82NTgvdEVSMjZ5L1ZOWkRlS1Y2TlpQNWc2L01aTnhRbXl2d252bVZNdUNwdmluVDdmT1c3b1dLd0xXTGJ0YktBVWt4eXBGbjN6bklRaXRtbDBkWHJsaDVOL2RxVGd5VlpSYjBPd3pWdDIvcDlHYjNxQlRCWjY2eTUvRXVLcitFK3FTd2puc25DN0krajhYMkZYTU1GVUVHVWhQczFLSXN5UEV4T0dqTjFVYUg2eHg2VlpuMndLRDUzYjFNZjRuc1Jhb3dodmJOdE9wOUd1azdTQTZJWjgxaTlPWTJXMzRtekYvcFl4QXA1TXJYN0g2a1VmMkQ3b3lUR1hrNnlFa1B1dGpSeFRQNnVwK2lrdzhyQk92cHV1K3c5aUJVNFhla1pNNmFzcVhadlZBbHRRT0tzQWs1dng5WXl2TFVKa2RnUGJZL1NBSzN3NmM4NERpbE1WUHZxNWVkd0lsVnV1Y3lsT1F3OUNsbXFNWlp0ajh5eHg3UVhQYWcyVzA0cjlJY1V4bDBRRHN5VFFhTlU0SERST2FoZk9wM3F1QXJpMWFKVDBwLzhoTlV5dzdUOSs3Z3BoOHhWSzhwQ1lDWWlaeW5pNnU5MnRUakt6cXpORWMvVjlBSi9EYUZWNk9neSsvSnZaeG1vcG1BNVM0S3dRbGcvM1RCVlZTMndSb2g5bVNZNkc2SWJOMTRQUlJSa3QzRk9SUjJaWWJFZmpvZVBLM0d2Y1Z5Mnhodkc0UEJrdGo2cytZUHNobHY0RVpjcjNPbjB1T3pkbTVrWWFVRFhPL0hza0J2eDhwM2grbjJRYWY2bmtyM0RrcVRQeklVV3gwaGgvN1htakdaZlI0Skg2SjVKWXpKMkF6VXo4aE9ZK3o5SzNBdDR2SmthYzE1TDRWVnVmMk5UWFR6RHRyWWY5cWNmeGk5dlcrZEJSdHl0ZE9vKzNTajA5eHhKdVlodS9PUG91TnkxajZ5djlCWVY3S2c3R2RVdkx2SzhtL0lrLzU5dUl2OFhvTXlOYzJJMVpMR1RpWGJqaUxva1NUMmV5eGxMVGZFNm5tekgzTXJubHN1dDl4NHV1NTlWL1lsR3F0ZnhSOFZ0aEUrNmJiVFJkYlhKd0JsSU1xaVJkekt3TUZPRWdlVzVJQlFFVmQrZVFlbjFHNnZPYjNqUFYwN1d3OEdtOUh4amh3ZjcrL3JZTUxjN1BtdFNMRHNacjk2M2hMOG10K0Q0ZXFHZHRBSjI0SFc0TSt5eUNEN2ZuN2J4bExwMDBGdkRCSkZsSDJWNWwxNXk1OGxjaHltR1Q0ZG5KMjJMYzhGMnAyN3l0T0UyUzc4VnFoYWQ3cWovNG9kaE94Z25RYVJMUG9IMWFuMjl5dHR2TkZwc05sclZUWVB0a2Z6TFpkYisxWVcyaVMwQytDNlpYSCsvakVMZkZkRkE5aXU1bW5ONlVYMzZDQTluWkJ2UlZUVEE4NkszS0pUeWw3eHhDdk8wbnZuSEZQWmNCOUdXemxSU2VJZVBUc0sxT0ZqRnNpNysvWmh1cDRsUHRGWjhBOVRlem1WbVZmZmMxVnk1QW8vNlduSmJRUGF5cUZLOTNhMzhxaS91NktKa2RnWXJGZmIwOU55dTd3YWMxN0EwYmJEVUwyRzFtUU9zRjlKT0I1VUd0Z3o4dVJMem1XOG1jc2RQaUFiUTBXVWdRcjFkMk9RcUNRTEttU0pwMDlXeHhYSkU1WDBNUmxZT20zQ3VYbXlNQTUxMnFyRWpaYWVycDF2K2dtM1dWYmg5eXlSRnNBd3NiYjgrUFlVcmlLMGZaMEdsanBhQVpVZXQ3Y2tEK1h5WGp1amZxZTNZL0tKSXZUMmI3VkR2Q3owR3ZxWUEyaFhaREx2TU1OYkd0U2FQRDZOM2xoNTBPWlI2RjRvd3pYZHlpeVVKYTZMTE9CcEMrb0FUeVZQKzRYZFAxL0JQNEYySk1vYWIzSkx6ZW5aOHVhV2J0R3ArWkVPN3ZoTCtjbGtoZVl0ZGJMeWpHbzhIVFFYeDFEbXV5MVJpU09TODJRc0c5R0orcHMyTklpaFBwR0UwMGdXVHBiQkYrRTFQMWI0Q1VCendFRXV3WFZVMFc3bHF3Si8wTVZWTVo3VHVHM0hOYkQvdzIwVnRPdHZIVlFhcldsNnkrTmpYNTN3aWN4ZjRlcm8zZExseldscXpET2FNNDVsY3B0bWZSMHYyVjUzczNoUlhEUS9CUzJMN0ZKdHNrU0ZETGhrUldXWlpGbG0yZEtyOXBteTB3VWd4V001amxIOTNXU1FxTTNWUVNKN0lkUjN5MGJWeWZiKzdwS3R1YnlyNzlDcDh6RWEremIyZU5NbmgvemE3RVI5NmpQc1pkRTAyZnR3dTN4RHRkT3M1aXpHZml5ZU5yakUyU3ZzdDh0NnF1Mm4xOTR4emJkajZGQ3ZhUTdZYVVuN2NvTC9MUmxQTjRBK1lYMnBPYStVNzhYNFVCRm05L1ZNM2wrY1psdmZyaVhCc2tGemVvUktjZ2QxNkpuOGlMdm02YmRoOWQ3OWt0ZjhnMUtNSzQvRlZkangvVmZoOFNxUC9JVm8vZFY1cG5iRWE3N0thKy9lSzVOMFlYWDhrTnhaTjZCUFZLVmZidVJadHQrVjdYOVY2cElKZTlEcDNrNGxqeDFtekkrMi9mdXdnRGJWTytYQ2F6eUgvNUFvenZYdWVhWTgvNW9mWFBHdTBxY3Nac3hWOUZYS1VydTd4MWJNQXJ5S29aL21kbVdzL003YzVZTTY0U041MjBDcE16YzNxNVRqN0pYN251akVxY2dSc3REZW9iaXZ3ODBWa2F2U1p4RkQ0M0V5K3gvSkw2ZndySkoveWhuUjZsVjYyV3N5dStwRUJzcXM1UXNuVkV2N2NlMkRUUE1idEYvVFhCMjAzWDBjWFBkelNVRXI3M0V1M3Rodkx0NHVzOHhPZjQ1K2ZBb1VRdzBJV1dTalBBTjZyeWNTdXRHbXd2NDk5eTh5TjZPUlluemc5WDNrYTVxbzVzY2ZSbHRsV1hWemcxRnEveGI2SW5pbkYrcENBeXpKazZVSTEzN2lZS2RDdmJJdDRxRHFWb0xsN1Q1ZWRyUEo3VHB2K0s5NHE4UE44MXlmVnNnN2Q0Qk8wbXJORlZBZERzemNBU2tSS0dPMjFFOGhobkdmYjJnKzBpYXI5b29HQ1d4WG9KVnFIVk5lQzNwR3ZTY0R4L0tWNnRRYkp6MGtWa0QvdUtIVFBSUzZ1U0VkNS9xeXJVdGJGRlp0U2dtK1pJdkpFKzNXT1BNUm1jYnFlSENRUjRYK1JlYXZuQldiWnZzaU15ZlU2TjVlRW5sQ2JYSTdTYmhLaFB0cnBPcjhCUS9RdkhteFEzRXRWV0hrNldVN2Q0QnBobDlabXFNRHZSZyt1cmtFYm56VUp2TUR2b2dLdms4UE1vMVdRS05QQndNZmJMek5kdjBSMnpWMHcxZkJLMmtlWmY2QzZtQXRpL2lDUGkzSis3Q004ZnY3a0VTcnFvL00vVUI4aGNXYTd1dTBlVGRkUmFmSGlVenl4TEl4NEhseDVhczA2T0R3YlhzcFE5NFFvSW1wNStKMXRoNFFoamlBdUY3bi9MTzhQaWhSVERYSlhDM3VxQmZVb2lTeXJpd3VTMm9ndTN5clBJOVdLWlVDSFJBUWRIRFZKblZoc2pTUUsxSHFsdW4xVGRIcEg3UXEwVW10Q0MzYkpVQld2Zlh1ZXkrbXBUdDhWcGZNdFhzUkMzZVFxT1NxSVRXWFYvY25mRkQ3RjgrV3B4NUtwVmlnVVdibFdVZDNxRzFqYlNMdk5qUTRwMklpbXExdk16Q0x1ZFhid3ZmNk9MTnd1VkFTUUhTYmlmbjd0ZnkxeW5pSGFDOVpJM3BxalVqWUdybkpDR1VucTZOS1g5L0xXTHkvcHIrL3ZqTXRTODVuUDNSZjJOM3ptL3ZYVkprQ0xVaHhaY2w1UnVyeS9wMHg5bnU5MU5VZmtGSHBvM3NWMHR4cUhLVWxHdERpejNFM1cyTlJsMlZaYklUZXZpb0RxT29jbHVid0o4Z0xwVWpoQkdWb0ZXRFRQaXVpWDZIS0JtZm9SVUJ4c2tTN3VOeWlhTDFwMEJ0eHhpNmlZeml2SWc0S1hweE01K09RS25scXFBTFBxZVFLVkltZUsyL2tiU3Z1eDU5QlhxUHp2SC9oN0dndE93enowOVQ2bmFaVzFaMUN4ZnRoZis5NTJmZWRIVVpuOCs2ZkUwWnRHSnQ1Njh4Z1lhZC9jQzZmOGV6dHkyZWYwM3RQM3pvNy9VZWVpL3g1RHZnN3pnSC9QSWY3UjlKYjhWeVpkZ3RUbkpWVWpFWW1oYlhnVEp2OFhxMFpsTy9DS25lSnkzajRBN1B5M2dQRDkrTDNPMkgyMXRuejErU2NSUFlPR2pwb2U2V2ozNlJ4ckU5LzR1MTc3NVhBY2duTjhWVitUTzh3K3dHMEk0c3lVTjNWYTNKemw5NXpXbngyL1B1ZHUvL24rK3pZUCtUc1BUSm5sOGprQTdGOC9BdGZxWVBZaXJmaHZDRjcvanphKy9zUDRGVkdENkg3d0dlUndvSW9IcjZEdHRCVjh5bSswTUdxN1E4d3VmOGZPSStmMWxINndHbjhmT20zdDJEOTBHRHlmMUFFdkllVnovays1LzU5MTJmY3V5MVhJbnVSUnZkaUtBYlFkUjRGTGY5K2taVGZndnVYODNRTG13Qlp3SG1oa2l0Y0RRUnFKWlEzbDdMVUpMMWhrdVNKRGRvanh1L1NLTzFCcy91ZUxJN3U1KzI0NkN5bHllelJYalRPRGJQMzVwVG1UNi9razZGNU1SUTdWOG54ZnVtTVEwbG83MlNSc2FmcjR0bUJ5MTRweWhmTU5TcStJWEpoOTF2endyTzdlVUdUYkJNa3pUUER0d1ZVajFId2ZMUDhUbTY0dkhqTnIrVGtaQnNDV2Q3TXBiOFA1cm5RWERIUDVYMjVScE5TRGwzV1pscWR1N0lhWG5KWHNnMkY2dnlTbWJqYUliamZSbE4rVCs3Ty9UVUpxKzljVXpFZjU2MDFwZWNUS3M0S0YzSXAvdUJvM2c4N28vMjdJM1h2VlZHS3Bubnh6YTBVNzlKVUJTWDlGOTdDempOYjhudk4rejlqcWUrSXBaYndWS201cXpPR0N2ZmE4NFJLcHBsVk56U3oycXBrQkJCdFRkaUdmTmVvU292K29icWJieEFwTkFkMHNwY2dRazF5Si9CUUpONzFWYkd4bThELzVWb0RvSzAvV3JnTW5GZFordThJUDJNb2x0QmNIakQ1M3ZnNFZwMGVrZTRwNXd4eUhTU3JMQWdnenFOTGVuRjI1TEY4a2M2dDkvRFgyY2k0WHVOUGo2OXlnekJQMlVTWFFWTldxSks5UUJmN0VFZDNDL3N4ZHQrK3BtMzREUDVKaFprOVhWOTVsRFJXU2RXYmNzRDVROGYrWFRlNjNUV05TMmIvd2g3ODN1UEEvMFJsUVE4S2lJMncvdmp2dWhKSFhxZ3B3SUEvMG1xeTljZG5CWVRHcDdxam5GWUdxbk1jMWgrYm4rcU83VjUrTno3Vkl5VXdqWWg2Mm00akc5aG5WRy80eVFnMHc0MFUwNmcvZG9uZlB0Vk40S2tLZ04xcmNSaDVEdnhYS2dNcEtBUFI3M0JvUENzeGlOSW45U2lJamZxblV0M3UrbSsvZmFvYjdnSE4rbExldVA3NDc5OXcvVlJVS3ZYSnd4VmRyU2p5NjQ5ZmlVL29YMkg5c2RWcXd1OVBVYUJ3bVVnT28vcW51dVdGVWZaVkdRQy9mYW9EUlRWQU9nYndJSnpnN1BiZXI5UFY1KzFtL1BDMS9xbnVHRkZnYTJFVkFIM2NMNXg1WkR2RzJYUGh3UDNRVnI2c0RTK0dvajlLZlBpTTgzUlVwTGorMjZlNjdTRG8vYnZ1eHdBOGVjRFdrdnBqblhubXZPZ3BNRUxEaGRNT0ROTU9vd0MrQ2ZYd2MyRG90djNaTmZBcjN3dnR5TU12TlM4d0hrTE5WM3cvL0lJcm9GZld0bzBVcy81WVA2U0ZiWC83VlBlTklMVER5SEMxU3VMd0Q5ck1EaU5VT1JaWHhwNTdPbHpLeWxCMEliQWpZNjY0Q1lRUE5NZWVsTWlxUDlhL0hKVGdDL0RNTC91djRjT2wvRzJLWitDWjhGZG9uK0d2Qm0yajZ1ZGVvSmdHSW93VWNlNXorQkRHcW00SEQ4WXBNZ0pYQVEraFZ2OVVQM2dnZG94MEdtTWJHR0VTUm9aVC8rMWZjRG1CcDhjYVFuUCt6L3BkZUVDVXVaNXVyQTFnYUpFWHdNOXlZcWlYS3dwN2tDYUE3Y2FZUmdQTUloUmNObUtUd0FpOU9OQXd3d0hic1NQMEw4MlA2NC9FNXpha0lBY2pDeTRaOWZBU0crSHJyWDc3VkU4TlhvU2NGQTZZa0NIWjIrNzFFK0FwK2tBQmlxc1pBZk9VbFFCT1FWL0dSd1ZSUnBxUDJTRFcvWlNrUTgweUhDWHI2TmtHNVRyQ255MERPTGJwZW9GeE1YR1laTENVeEJVQjdjcTBKcWN2aysyRDVteE5uYlNBYWc5c1hRQWhDdlltQXlnaUEwblFnWmEwcGt3eTJLSWFIeE91b2FYUkFXYkNlYkp3Q2hrYXFqREdWSVV4SVpFV0ZPa2hWdmRqUWhGbGtKNldMTCtueDdIYzkzWU0zUVp5VnRlV3NvNmF3enVLYUFHWnltNUtHL2t6ZS9DRTZvdlN2VmpHTVh5MEJuVFN6aDZFaXRBR005T0xWMlB1ZVl2eVNyWnd2bm1kTFg3UGJWQk0zNTFQWjQ3dTY5UlgvRGNOWE5YcEpmTFNpeVhYVDJaSC9EZXFKZEZrQVdXM1BUbUJiUzIzOE95c082MERaYy9OSmJxVnBSY3pOR3RKWk5UUTB2cVRxRGFVeXpXMXZ2Y3ljMWhMUWI5WEVmejliSG83Wml4Ym1nTU91amczMTl2VldEdDZ5QVpYSEg2bjk3MVlFVlpBV24rZFR1MDJvWXFEUkNXOTZjeVZ6K2krd3ZYWGtqZTJHdldIODlHRDRYNTI5Q0ttNXp0bWhLcWdrSXJBTnluVFg2d0lzQkNvU3hWVFpsVHlJRkRGQ0dtTks3VW93amhrNk5OQkVwYW1kSW05NEdxb281SXhhY3BDbTFSRTlxQTZEYlFqTXpOOVRtM0tFTXRtN2xuZ1NyRm85MW1sZTVZOG1aczYvZlc2MGd5cXhxSGFBOWdQME54Qm9xRHEwM3lzT3lCUnlUYTZlNUNoT1F0WHRsN2hMRDVVWldxMVY3QVJiS2tVcW13RGxYWXNrL3daSjJRUHNQZEU4eTFGWExVejZwU0ZKWm9IOUNoVkd1eXk2aG42aExWa1IvYWxaSkJWRUVOano5NEJSMGxnMFgxaVVoTnlDS3IwUkdqTzJKRWRzR01tN0VFWDBWWEFKbzR4bm9CQkE4TEExVWV2cXVTVnF6NXJDYTVraEdJYUR0akxHRi9RU0lteisxdVl5ZUNnSUJpeDBNQUNzdEM2aG5IaGZnZmNueXhhaUpzazRWak1tb2lwM2NuVzdLKy9QTkZzTWp1M3BtS2pWNTdmYUh6VUp0eXplUFMrU2k1emVETDlpdmR6VXhKWkpBRWtNa0tWMkc2cldhODhTVnlhRWptT1ViVW9Pa3NxVGlzQmpybmhscnFDelloSGhwYThSalFUS1VLN2dReDBNNXRML3ZjVTh3TEVFUWZ4NEt2dWNrcnRjYUwrcFZKMmRrOEo5bHBsNm1KczRrb3ZXVFVWU0Q4Y01hTVFuZVkwZ0RQY2NIVkNTRk9YZTA0R1RRVkpTTGl1ZFBkVFdPYXcvZGc4eHFHRzduL2JRNXo1V25OMWZuTWVnQjF2UnZ4Z1MvRDQzbzUxbzNqZmdNMU1kRitsajZia2JQTmRkcGxxVFRPY3I0VzBVdGJvVW5GcWZhbUlsczExaHlxbWtlekJvRkMxNS9RM3Y1OVJWeFdlTTRNK0hWZWh4NlNjVm93cTNkTUkrVHRkVTNvSFRGVkV4TmVTUmw0VmFpWmtWY0x6VzFaaG4zdGNqYktISytEYWhTcFNOekF2cjlzUWVnMkllM3hmVHlZWDVmWWRmRGxxRTQ3WEtzRG5pTWVmUUVuUG1CSjVhbWpOVlY2aFh4WXRLQ05DeVB1cVV3RWp1bUZwVGdRMW9hVWxsM2xqbVBMeHRSeE9aUmpJcXlMbDQrbm5Zc1d3VzF6Z2FwdWxDdGM1Ly9qTDFIR0NzaUd0L3RmL0txMEhIdFRVVDJzVzNaT2duYjNEakx3Tk1zaDBiNmVoeUJYVUh3TkNTM3JGKzJYS0dVbmtuVXdKZDM1Z21qeXFmalFUR2cxMXN2SlI1VzdoYm5zN2orY1BDVnNrV2FpL0FtYlh2cEt2cTRQVXhISTlsZnRmWitUb2w3UXkrVjRXVjVZaW5PN0xsUEVnVVFRT1hldE83ZHVUOWJZdEZTdnZMMHZaSG9ndkhNM0pLbEtsTW02TnJEQmM1YjlTem1XVllwaUN6R2lqeU52Q2hoWVpuMEFaQ09VRnJxNklLdkE1TXFxdWlpdVhvMnJ0ZVlTdlphS3FkUTYwNmpMWmhPUnh1MWlSSFZXRG8zdk82N0szWmVaenl2NkcxazB5TjFkTkhsV3pSdlEvdXNDWmdqQ3NwQjB1Vkp2OGZ1WnlsaXB5RGRYUnovSmtqaXE1ejhpR3BicThwVkk5b05vOVo3N1prdEpHYXl3RXBpR2RSeTJaSHJWbmprV293bkdYMDNhanQwQ08rTGhYcWxnb0V1Z2V0b2JxUUozTDVQc3hUMnYyV1hKT2x1cUU5aE5BOS9Ka2EwQTBjVytkMjZ6eVY5K2Jic2x4cERWNWFEbHZWdU81S2RNOVZEMVBiUzVObFpRZDJHZWhVaGlTRjJrbE1FdWI0TU1tV1BZVjVCRGRhOHFpRERUN2lPOEFGUGtZMnkrWkZiN0VkbHZoVGxGVWhSTHpzeVhUSzJ5ajBORGU2VFZ6V3Q2ZExBWlZxSlI2akdNUittUndYdGhmRDFwekJmVTB5bnlSbmROQlQ5bzdsU1FPbXNnRHJZbURqTFBteXBKSkhjaFU3OTQ5Yy9mNGI0T3FOQ2FEcDd6LzgvRWdiZkwxM3FFTmFLbGJEY25HY3lucmdkN3Rua2h5QjYvN3Nyd3M2YkZTVmN0MHZGMXBidE1scE9WaE5kejBwdDZjdVVnT0pmSzZ2Vk9UZHFEWmlGN1BldElnWklIelZOZy9xYmN2OTRWdEQycHpBRlM3a1FjM3RhWjJZT3o4QUUrUEFUMWJwY2V4a2pDL2JKUEdFSG9nVDFUUGVyTFJYaVlKUFFVTlJkZGgvMkIzWmNOaEdUQkd0SERGdy9mazFHVzkyZDhacmZNMG42alFEaUtseTY3TnVqOWR1bnNvTDVCTm05SnpJWkFKRGpxa3d5WUxaQ3pyTnN0Ry85b21IV2lUQWRSRFFITWFaMXhWTm9kUm1OblFzc2hHbWMyS01nZHBrTm5GZWVWK0dlR3cxMHdyUkI5a2Q5VkU5aWV5Ti9sWUk3ZWVsdXhUdlZ6cUYxVU56UGdRODFIdkNPM25iRisvdWorb1I5aUc2cXhDNUV1Z2UyVFRhbzlrejlFbk9xNlcyV1F1ZUZsZllMdE5NdytoUDZJN0FPaElkNk9xZnFYMVF0OUVGdHBucE9mSmNTSUxhYlh1SzEzRjBHTmJiZktvNmgrMEt5VG41TXNYLzZHdE5yZlFDMjh6dEdYcHpoYnRqa21sS3A3dm0vZmw3NUdwVEZnZzd3ZzczY3Z1ektDK3Azc05tV3FmSmFGeDFpR2ZrYXN6eWlkWm80ck1EVWs0SG1TaGRaQjNvd2JuakpyY0J0aWNNRDh0NkpXMVdMYzluVzZFRERrNkx6Ym1lWDdtN01XbTM1YklMY21kdGJ1eTVTNWRqUXQwTmM3cDZscXVWL0sxRFBFNTRlMTA3dVhOQVBKbWh3L0MreURaY0kwZ25oRW5ka253aXkyeXN5dm5qSFhVSzc3a0pzUDdwaXlMS2lJQWU2OFVBYmpKVGQyTTR2bUdpVG1xVGNoTnlOSERsNUE5aDQ2L2ZOdDZpZU1wdUxZQ0ZxVHNMRjZTZzVIb0ZqVU1YV1lUQWZsb2RxV1hkcWU3R0hWbFFXTVdzZVV1NG8yN2lJL3hJbjRPRjhuSVhTU0daY1F6ZXhIUGZLcGxVbkVpZ2dVNUNoZmsxbHJFK21HUjZORWljV3hxR0RueTdpVU1taUZvRDBPTFBacGRlVDNxZEdpdDB5TDVMaU5JekNKUmR3dHlFRnpHQVllYmVjYVdDK2VuYm9KZDI0MkF2QXRlMUtYWlpRWFkzN3pUVWNMdUxPbDNXWkxBZlpMVGVCRWJ6b0xjSHRiRGw0Z1pCdjdMT1hTa3Z0a0oxdjFPaC9LNnNpQjFXU05rRmdrSkZpOUhjNUdZcHBIb01UVU1ndGt1OU5pMGZYZlI2TElkcTh1c1Q3Qi9aaEVmM1VVeWRBMlM5NmhoYUxPbTJXVTdUSmQ1YVhSYU1kTnB4ZnUzSXd5endQYVhWNVErRElFeWpBQnpSbk05TUdpOW9TWHZRbGMySVU1YW5YWkg2c3JySG9OaHJJUUxjbTZ0aDBIWUZVUDNaUkphczBub1NrdXpPMU8yWFdZeDZNck9GcTZ6RXl6TWEwK2p5NnkxVHRjWmRabVhmWmQxK3N3aWtlTkZUSm9VeE5NNWlLVk5hTDhzelU1QWpib3NDZkVraG91WEpGd2s1bjZCNmNWanp5OWhWNHlBNGdaMmF4ZlluZVVQaWpnOElmaDBPaThUWmhHVDFpS21va1VpN3FsS3pUTkduT3VJSVdoRGZGSEhydlJMeUN6SytPbTBmb0YwcHpNTGN2NnlJQ2wva2JqQWlKZVFya0N3cVlhN0o5NnM2OXA2N0U0cHJjc0t2UzR6RGJ1eUVGR21sM3Y3blRiNXRkTjYyVEtJSDJMSFdpUzZRMTE3K2s4dklkTTN1NnhCNDdhSUg1V1FPbDRpRURIRU4rUmZ6QU8rdDBFMGNlMEZkZ0lLNG5Ib0dza29OT0xseTRWSGM2bnpuWDNDK1I5aTJOYmJZZHdFMDE2WGZUbk9xTDdkNlNnRTRrSG1aZC9wdkl4blJqenlvWXhZSkZOL1FTNGNMQSttUGpVTFhQV012b2U4MU9rb21MYXVQZkZmWG82UURzMTJFOUowc0ovZTBoZTFmOFViWGlRamIwRkNPTXhjNm5qenZzc2F5OEtaR0x4dG5sUnRFNFB6VE1qSHlXNnk3VnkyOElmNWVrcVJqempSSTJvWVJ2N21KV1NHd1o3ZGhTQlltbmtxd0IwYTZMUXAveUpEY3Y3STI2SjUzOEFLeXN0aDZMY2dQNHBRTm9aK0M5S1RNTzJ5S2U4dnlFRzBpSjhEakk5UlNBMERNOWdnZm5sclR0MHB4WGRsaCsvS0hRYnlsTE9JS1djUnU3dEtXaGlHaDg0d0NMMU5ZRTAza2QwZGh2YkxCdU5ib29sTyt4ZEVJMTFwZmNSNHY0L0RUa2Y0ZWxuckU1cHJkMG9OdXV5TDM1V0ZDamdGb2VzUFEydTJRenFzMDVvU3FDMUw5dTlaL0JYUnFMMUtjbWVVSHVCd1FKdXN6ck5tOFdiZzBwYjM0ZDRaRWkzNXVrdXRhZWp0aFRvTmppcTlqZTYzditQdHhNa1hieEVuMWdMeUV6a0xFUTloL1dTeFIyVDlJRGd0a21POGVEbDdDRC9KekYyOHRDQ09RM1lUdUY3elRSa0dlYndUVFAzMzdEQWdHVlVWVWJpbU1TU3Y0VnczZ2RjNkJ4N0VTU3FidTdKZ01vdUVjVEFOaFhaUUlXZmpkRTFVdjRQa0Q5WTMwZDVEOG56Wm5VMkpWTFpTd1NKUlhveDR0MXRndVFGYWF1ak96b0hwbStHMTNsdGhEeE5jdmt2RVBaYURTT2M1TDI3b3FrdXowMVg2bldEeHRab25yNkpJMkg2QU1uTGpRcmd6WDgxT0oybEJIZnM3b3lXQm1ueHRjT1NJa0J6VzRzNzc1bUxZUDBtT0RMSm95UWJwR3V1NUVEVzVIeTFaZW5lczJHNW9RdnNJcnQzdkkzcEE4cm05MEpDbmVuZmRpV3N1RW5WL0V6bDV5bVU4czBoNGIwRnVkNHZZQ1JiSlZ3eW5aT3lrOUxGamh0am1uQnI5TGhzdnV5dzVZaGFKNlM1ZXpwR0I2TmxGT0pXQ08zU1N0a0V5cWY5RG9nLzN2UGNydStNdWoyUWVCNEpkRE9rckdVRTdJKzVzZ2dES3c5WXVzcnY5NnpWRHVDZ3ZyOXFWdWF4N2libzdhSys4aEoyK2VjZURhK3BOTFVheXBza0M2UDNNbkNpWk5ibm1URndCaWJSaWxUd2Q1T1krdW5pSHZZTkc4L0hza2pONTFwT3ZkMmtHMnZUMnl5WTh5QnVvMzVBOGdqb0swdjAxMzkyTDFDQ2R0b2puNW9Ma1hXcjRFcytHb1QzdGwrelRWTWJsTkZGbDErU1JEbnNPL2FLU0RRdnRNMmozVTNGUmp1eXdyUXp0TnF4VHBFN0hJYXFqcFhnWHJEZ25TTmNINDRVd0thaHI0bjJYSmVmTUlxRjN5QWVDL2tlaXZpd1NJYUtRallCdHl1a3duUStaNmlZOEx5aG5LcitGdXJaa2oyK1FUOUtWQmE4VHhOSUZKdkhTd1RJc0F1b21zTHQ3czh2YSs2NjhacnFNTXNmenpmMnlrWWYxU0FqVTVrdUVkUHk2MzJWc0tjWEZrMk1rdW9OMHlVdXlvNGJWOWxlY3JuL3hjajdjckhFVCtPclI3REl4N0h1RmJZZVh4RnlRZEtxanhBQ3V5enRIZ05sRWRyQUxuUTYya1RwdGU1bks5Wkc3aU52WWhzejh2MTBFa0d5bXRDNnowSy8wU0NaenBFNG5JVkthTVNEdnhRdlN3TDZvaVB1UWQ2SGRQci9FTStRdmJEdnREdmVLalA5RDVUZDMzamE1TXdDTERYT1dkcnd0RCtmbitUMTdBSHlRTm9mbGlNTWRPZUVxNHNyVEJTYWRlNGx2RDdkcGNWQWU5bXk0UmtWb0hUWWpNRnh0MjV2VnZVajhtN3NxTi94Ump1cGNuWjNFa1pMYlJJbkZDM1RMRmREM3BwdTl6bTZBZVZma0lQSzZkb2RsUjhKbUxCTEZtb1hGVVdRSGJoQzJjRmdFaFMzYUM2M1RwVnFkOWk5SENQSXUyeG5ucEdQM3AxM1cyQ0x6Vmw2UG9QdUhXSDJxTUlWUVM2WU9JT2tIbm53T2RySVlXdERGWitONVY2TERmQnhrQXBmbkNkK2w3dGlUZzlSajdFT1JWaDA2dUE0YlFIWkZhbGcyS1J3VzhhYVlIVURuaU1JR1NQVWpNNXRzTVlzNGpKR0lRZTNMWVliN2JGaFcwOThWbHJwck11Z093c2t1Y1AxZEJHYUVpV0g4Y3V4S3laaFp4T2ZJU0F3UHViODRSQkg1bTlCc1RTSkhoampjSVhWNUhYYTVFYStzMDRMbVgwa0VVY09Ya01FdWNwYzFqcDFnZXV4T3FSdHpwVUkxWlc3Y3MwaVVjYmtVQjBldDBYdSt1TFFWNzMvQnB1bUxwMEdUZElUZEdtUDU2cWFlZ1UycmNEYU1kaEN2VjJKeTE0SjBSNWhkS2ZHNjBuVGZuUnA4cDAxQnVoS2lhcmdYdzMxM1ZhN0hucUZLZ2Faa0JCUmlTdGxzS2pJKzV2YURsbm9UWXZpdWtBcWtUV1o5dW1QQ2YyZVlCczcvbHhaVUxUWld1U2k4NlFUOWtLRm1nUjlzRUE5Q0ZmamliYU5PYTczdnNoMGNacE02RWc1UnZ1eC9aRWpudmd1UDFJTFpsU0FjWW0xMnV5YmtWditJa3diWXZFQzhYQ3F1bWJvQWFZZ1ZtaW5RSkJxTTdpWndZQnE0RS9JcGh3TXFRd2JZSlRIQmxldVE4ZjUxR0lLNWhCYmZtaE1LcnppeUdMblFCWVhtWW1zcWRUckd2SklXRmhXdWUycWltZW9tY0R1SVJpSnJOa1I0ZnlVTWcweXBmSzIvSU40T1BXWUMzYlhLMENzVjUyWVAxR0VvMUlOY08rbXVxMUFSK2xvZHBPYjhJSkc5V0NMNW96NlpId3Fia2xINVpNMjlUV1QyUEV1NGhvYmFOQ0lJVzBVY2hQSzZjYmY5UGRlck8vdkY3SFNuSThSUFVueE1UVnFvbjBZdU1uTzYyT1NjVWExT3NFRDRnVFRmQ1d5STR5Tll4TWJ1YlJuMkVqTERsL0JsLzQ1a2tDR1NVVnVDVzk3WUVqZWhMbVJXaDlFaTN1MndLWnZLWmlnbm9aeXlKVXhEeVRTcW1HTzJKbWJvWlM2MTZTN0l0UTFsaHo4TXd5QU5zYVd1VEtlem1LZHlRN1RpUkRzZ04rSjRKMnkrdmJoQXJKR2Eza2puS1M4R2NwZUN5QnUraE4xemlTZVpSZEp3RjhuTW96S1l1WkEvd2xBU0VaMTFXV0VFN1E1bUVidW1nYlozVUpneW5FRStIQ0tidzVydFFzZGZ4a3ovOVlRR2lUd2RkR0VaYTFtSW9jbnR0U3lwSWFkSmxNNE1UZTU4NHhxRjhiTGlFM1l2V0V5NGJNMnhNbGxGNnJBWHF2aVd6NTVDM25Oeld6YkNNWkpmTDhtTEFXVkxjckxXREU0MHdtRXZKMWozZjJHb1dlajRtNWVZTVUxSWQ5Q3RZdXhoYU0xY2JJdkpEZy90cXRmQ2NGbllCZExzTHNsRGZWUHFPMkNqQ3VOWUY4YmhqSXdPcy9PMktXMVd0dVNNbW91TjFwb1B4N2Fjd1lIaXNrU2JYUGFJNVlMano4dEM0Z3BsM3cxWFppRTFZNC9wQXVtMmZmdjRhZ0pPRmdhaFRIK1RiVFl6WTI2MC9TWFRqL2UzK3E3Q0J5Z003clNIMkxXZlVsb25XRFNRTEpnYWtCOTRPNzdEWTJrYkpNK0hQMlFqK1gwSmJQZVR6VEszckJ4V1dTUmRmeEhIL2dLdWdaeUYxMnZPUWd2dkNyRytOR05rNjZFd2E3V2IyOVNiZXRKR2NscHp0ckZFZm8yVkpuUFFtbHFrMC94T29kc0hsZTY1eHZwU2RHNUdvcVNMS0w5TVFlU2FzL3NoYnVnUFRmMUYwZ1BRTnNDeVBOOHVmbC9JYllhMy9scEpIMjladjdUQ1JjSjQ1ZEFKMWc4WG1uaEhXTGRrLzJmaGttbEpCcWRib1duNE5OK2FydElMeUo2L0U1cWFVY1BBN214Q1Z6cWFLR1FqcjBmUWQrdXlzZGRsRmFJcWZBTjlQS2pYOGJ5Z2pLNytGdG9wNVhBSzh1Y2lvT3hlNHJhWnc2VFRwaVFzLzBrK1dzU3plRDBNbmVrbUFzd3V0THd6M2c3T2ZGcG9WNWJDWU1QUVo0YWh6ZTVTWFB3aVF4c2ZiejlQNTh5aTJuWXRoOEN1MXBqcURMc3pESDEyZ3V5dVRqRHRkeVhGTEd6ZlY0YmNISGFZNnNSaUdCSDd6dEF1aXREMnlEazAyODBySFp6S0hIbUh0aTRRemJBZHlIdXRkQXRNQmdidTQwTmJMWCtvL0o0M3VZM1dYQWpiOW56SDJaekE3dWZuK1YxYjZxTzBlYk1GOENNUy9FZzJWRWtHcnRGWDdkNTh2ZVhHRzhDTjc4MzVyWmpPRGUwTXI1TnQvb1ZQT1Q3Ylp2M3gzNy9qVU9WdnhRT0d4VU9FV3ZCWjh4em5jNmo1RDdZTC80M09JcVpud3FvT1I5NDdJQWpIK1Z1ZkR3d01ZQ2loOFdEcktHSTNHL1hYbzRmUm5DVjY3ZmsyaXAwNURiVFRnVyt2TmlxY2dSNzZpb0pPQW1xQm9VU0cvcUNpWTNydFRxTlRmbzg2Wk9aOWV2UWdodnFML3R4dVIwL0djaWVQTzAvUHdaSHd5ODBkeFZYTXJMdjFjUDNyazZLc3kwMVN5REFZVkw5eU5NT0p2MUw1T2NaZktjOXhZdGVPa2wvVGc1MmxyLzBBblIrc2p3UERLTDg1UU54NkxseEdmaUEwQWxWMEFBbktVVno3MllESXJqODhQSHh6LzZ1MlJpY2VIMnUzUnl1L3ZQZnlqbSt1NHRzOG5zZGo3ZEQ0NXU1dFYzK3NyWEhUUG03NnpYV01TTkdWU0huODV0WnErSXdtK21ldHB2aCsxUXp3eXhUSmp6VjhCdlQ2ZFFFVzJmbk5CengrZWFxNHRXVUE1M05vZmRFc0pZaXF4bnpBWU16bjlibDhoQlNpOGY1VWI5dmJiaGdwcm5aMzlyZGZYR2pwc1RZeGdIT3ZuZVk1dnVjYWJ2Ull1KzQwNVpESDJyZTc1MmEvMVV2QWZiQjEyUHAxRnNxK3FlUWorRGxpcElwV3VQUFgyS25pb3lJY3Z1Vk1WZEVRbytUYisxbXJvZy9FWDdBVHlHQVY3dzhaZFgrckYvdkFRMTlqdGdyY3JoSkhIaEtnWmE3WWVIdkRmYXhCU2Z6Ti9VNld4TnJHVWZ4WHVaRkNyZWFLLzU5bnhIeUNQM253SncvK2lUeVkwN3dDZ0hkOENGM2I5NDNvb1hCSkJld2NhVXZjTjlhZ0Q3R3JHd0c2bndIYU9nK1dvY0Rmc0MzaVc5VFVDcVBycjYwbzhoOENRN2NEUTRzZU5FOUhxMnNTRGZ3YXFpY2plSWlnQkxqK05BeEIvdVhWcXpnMEhwNjk0S2dFdXFGWHp3VTJNYysyWC9yeU80VkxWb0hsbmxoNXltekxpRWRHR3dVVTI3a1NNWGRRQkszRUd3bDBYNHJrVm15RXpVTU5qL1NtMkhxZm1IbER1RmxHWUVlS2FSVGx3VThXLzQrd2VPZ2JHdWJhM0RuSmlPVUJBclBvcGVBKzgzczhIalBvNDJzNjBwKzFXdXFMb0hGb08yVzVLLy9rc1ZidG5zQzJGLy9rc1haeFR6N0lZeUFPSXlQSXk0cVVHU3hRRmUyekVrZVdGNlQzOVh6ZWY4VXd1bWgwM01QS0E4YWZvTk12MC85N2EvV2ZYUHlYVU5TdWNmem1CakZJbWZhaHB2ZzJIWGl4ZitGYXlPMFhWSlJaSEw3Tnpjenc4c3h3ZGQrejNhand5SVVDNVBMVDkvVENyOURRQXFQVVduR00wRmUwN0pPREVhakZRWUVkUnBkZlJ5WFNyT3I1dy9sNWdXNjdSVzZ1WHN4RERkRlp4WWpGOFY0ZDdXMW9GY0J3dlNiVGlMNjMxOVRuZnIzakQwSU96ZGFJamw2d3QxM3pWY2pCcGlsQi9mZzV2TDV5NDJEa1pIWTlKdWI4QXMzOStNVitDU01saXUrTUgvdDZPdjZQR2hEZGl2bmpRYXpib2VZZGpDQjVjeDQ1WXdQN283eFptT1IzS3V4aS9ZVGZwYmNIdUtNL1ZYMnIyUngrYXZHZld2eUhhSEVQR0N2akdkdnNLWk8vd2htd1dZVkIrNjZod2xqZEdWcVUyUXpWY1dlNHNBOUVDYkxtU092RDVSY0cvSDQvK25mWStYK09nZi8zdCt4L3h1dis1dkc2MytjT3ZHVzUvdzRydDhyVGVNT1B1SEpFL2xOVzZmOWxlL3ovWFRQNVk5U1p0ZUVnUStUdC91dWhTcElERkUrK1djZHRrNGRYOWZLYnkzMEwxQjliNFgxL3E3cjNkM3ZpMTc3NDN4R1UzNzNZajBMMVArWWYvNlc5eFB1VjlyN1A4dnZUWE1UL003N2hUenZ3NzI0SGZxOUQrVDVQc2pUVzM4ZWpMRmI2ZXlNRjYzMzdzZFZULzJHUzVzOFFDSzh3K3B0NVl6L2x3Wit4eVJzbHZ2Rll5d29hd0NlK0YwU1gvUTg4UXl1Sy9FeEp3L2VQdGE5RS9qdndJay96d0dOdFF6MWxEM0VGbENmVTlQSnhzYnV3M0YrcjFmeFFoeUZPNmNCRktQNXZjY3QzeWlmZDhJR1hPRVpsbGlncWNuS1JVOE84N1gvZXp0RUxZLzgwYzM2S3RUL056TWxsNEpVWWNhQkxNaXN5d2h1czhDWXpmSnhzdjRkd1AwU1NhVEdlOExIV3dOazRnUklaWnBJdUdHdUZsUWVBN1pyYjNPR3RRU2ZsOGlpSGpxT2MxbkZnR21sbjZhT3RxeHdVR3lncU1CNXJCQjcwWUVPa1Rld3c4b0prWmp0MjlGaHJvSGVvaHBhaUoydEQ4MXc5VEwvSUpGMkdtcUtzZ3YrQk1wcmVSTlE3VVBVOXlQbytkSDFRaG54UWpueXZMSG0vUFBsdW1mSWh1ZktqWk10NzVNdjdaRXl0bG9zTytKL3VocmdZV2I2ak5yYURTNHdqTDhGV0pOUE1FbnFOcEdvMWRCNnA5bGlyZmFzNmh2VGxmU1hNSGcrM2NFaTdmc3JycUQzV2ltWFVpZzJCL1d4b2lRYU14K0pUYUxhRjBUcUNLcnY4dkZZelRnWGdYUDZEczFkY3ZlSU5CTWNYMVhhL2hGYjF5d2V0K3JtejErMmc5dURYcW81SGZmbkhmMXRlR0VFNC8wL3RXMHdRWkFmL3Z3YmMya1A0L09aSFgzQUM1R2ZnbVplMkNNckZOOS9Wc3hFRVhsRFZjZjdpQ3RpQnNZNDgvNk9ncnQyQjlWR3hvNGZRaWlQZE83ckZOa3BnaGxmOVBkVHVVdFoxdzRjSHBFaHR6MzJ3OVgvK2p2aHJzY3M4OXZ6UGYvejMwMkw0SzllZmo5WlBmV3IwUDEvZUhReTQ2aTgveUFHVU1QeG5HZ1g4cnM3eU5xaW5kNjRyTkxRNHNLTUV5aXpqZE0wL211SXJxZzNzeURiQ0N0VHFRUVVad01uMFo3UGJ4NHF1VnpibVJwdGZCd3czL0hVOVd2RU1OU3EzQ1dLM0gyNURJNEM2dVZGK2gxTDVud0w3WUFQRE5FYWhwZ0FVQzhyTzFCUm8wejNja0JJV2VodjVlazZvN2lZVXM1Y1NrR1Z4ZGZsNDF1Zm91NThYQ2xEZSt6NmpvY28reG9IblZBRHMyVGFBbmtYRUtsOCtLWkgxbUpzbm4rRlFydytQU1BnUG53T0tnQlUvK0sreWFEOFlyaEdHVDRHblhvdDM2R1BUeHExdzk5RWdYeXhEQVpGMXZubUwvUE1HUWJaYjE2OVFVVVRqc1RiWmJKN0s3MnpYam13RkRBMmdYS3kvQm5FbEFZM0E5dlM3cnlQYk1idzR5dCszeTYvREdBbnNqUlVZb2VVQnZXQ29wZ0JVYkJBSFJxRkJzOWdnTUJUZC9xdUNxdm1YQWxVeGZIUk4vTVV3MGtWWEZTclVGdU5LQlpQM05oeFVTYzkzQWt4M1JpcEVuRDQrMUgrVnFTUGJDYnRTdUxpbTZRMWhhSDc4V0NNK3Q2K2Y0MEttajdVR2JWOEo1T3NERmQvWlUzYU9JbmF2K25xbzVZZk5IeXV0bC9JQUdNalplU0wwcEZBU3RnaUY2NEt3anpWVUR6WS9HRklLOUhNZkMvRkQ3ekJ3MHAxV09sQTA0NmxNK1UwaUp5YTg4dXQwbGZJYWFvVWpUNFhEVlNWQW9VTlEzR3ZucXo0U3Zic3BlVjhPMnQza1B4UWllRXpoVW9PckdGN3hmQjJlZTJtY0t5ODFmTkR4YlFqWWlDbWZiUHNQaEFPTGMvc1pFUHdaRVB3VEVtaHpiNzdnTk5jKzRoYlVQOVh6ZXlFYStGWU9aSG5WSHd0YmovWGYvdjhBQUFELy8xZkJDSUJ3K1FBQQ==
+  kind: Secret
+  metadata:
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    labels:
+      modifiedAt: "1770383533"
+      name: nginx-controller
+      owner: helm
+      status: deployed
+      version: "1"
+    name: sh.helm.release.v1.nginx-controller.v1
+    namespace: ingressnew
+    resourceVersion: "3492834"
+    uid: d9ce1398-bb1f-4f16-8ef8-2c1e054c3a68
+  type: helm.sh/release.v1
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: "2026-02-06T13:11:42Z"
+    name: default
+    namespace: ingressnew
+    resourceVersion: "3492670"
+    uid: f3d415db-1677-4099-a797-f033b02fee92
+- apiVersion: v1
+  automountServiceAccountToken: true
+  kind: ServiceAccount
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: ingress-controller
+      helm.sh/chart: ingress-controller-1.14.0
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/resource-kind: serviceaccount
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+    resourceVersion: "3492809"
+    uid: b0b32feb-4e35-4d66-8896-b13c17572b7f
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: ingress-controller
+      helm.sh/chart: ingress-controller-1.14.0
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/resource-kind: role
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+    resourceVersion: "3492817"
+    uid: 513bf87e-b0d8-4387-a256-238bd6580bd0
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - namespaces
+    verbs:
+    - get
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    - pods
+    - secrets
+    - endpoints
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - services
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - networking.k8s.io
+    resources:
+    - ingresses
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - networking.k8s.io
+    resources:
+    - ingresses/status
+    verbs:
+    - update
+  - apiGroups:
+    - networking.k8s.io
+    resources:
+    - ingressclasses
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resourceNames:
+    - ingress-controller-leader-nginx-controller-ingressnew
+    resources:
+    - configmaps
+    verbs:
+    - get
+    - update
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - create
+  - apiGroups:
+    - coordination.k8s.io
+    resourceNames:
+    - ingress-controller-leader-nginx-controller-ingressnew
+    resources:
+    - leases
+    verbs:
+    - get
+    - update
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - create
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - create
+    - patch
+  - apiGroups:
+    - discovery.k8s.io
+    resources:
+    - endpointslices
+    verbs:
+    - list
+    - watch
+    - get
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: nginx-controller
+      meta.helm.sh/release-namespace: ingressnew
+    creationTimestamp: "2026-02-06T13:12:13Z"
+    labels:
+      app: ingress-controller
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-controller
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: ingress-controller
+      helm.sh/chart: ingress-controller-1.14.0
+      product: nginx-ingress-controller
+      release: nginx-controller
+      release-id: RELEASE-EMJ095MUtumMGlcxvV5RTb
+      sdspaas.io/created-by: "15616"
+      sdspaas.io/id: IMAGE-Xsdqdf55tPeQjZF6Pfrw0p
+      sdspaas.io/managed-by: SDS_PaaS
+      sdspaas.io/name: Ingress_NGINX_Controller_Community_1.14.0
+      sdspaas.io/price: Free
+      sdspaas.io/resource-kind: rolebinding
+      sdspaas.io/version: 1.14.0
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+    resourceVersion: "3492820"
+    uid: 9626ca02-2265-41ad-86f5-ea016e98d809
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nginx-controller-ingress-controller
+  subjects:
+  - kind: ServiceAccount
+    name: nginx-controller-ingress-controller
+    namespace: ingressnew
+kind: List
+metadata:
+  resourceVersion: ""
