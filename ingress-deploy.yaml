@@ -1,7 +1,7 @@
 # ============================================================
 # Ingress Controller - Deployment YAML
 # ============================================================
-# Namespace: ingress (create first with ingress-namespace.yaml)
+# Namespace: ingress 
 # Name: ingress-controller
 # Image: nginx-ingress-controller:v1.14.0
 # Service Type: NodePort
