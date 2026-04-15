@@ -9,6 +9,15 @@
 # ============================================================
 
 ---
+# 0. Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress
+  labels:
+    name: ingress
+    
+---
 # 1. ServiceAccount
 apiVersion: v1
 kind: ServiceAccount
