@@ -292,10 +292,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - DOMAIN_PLACEHOLDER
-      secretName: sonarqube-tls
   rules:
     - host: DOMAIN_PLACEHOLDER            
       http:
